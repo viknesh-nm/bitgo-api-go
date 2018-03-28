@@ -1,6 +1,7 @@
 package bitgo
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -26,12 +27,12 @@ func New(token string) *Config {
 }
 
 // SendHTTPRequest -
-func (c *Config) SendHTTPRequest(method, path string) (string, error) {
+func (c *Config) SendHTTPRequest(method, path string, data interface{}) error {
 	method = strings.ToUpper(method)
 
 	req, err := http.NewRequest(method, path, strings.NewReader(""))
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -42,14 +43,29 @@ func (c *Config) SendHTTPRequest(method, path string) (string, error) {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer resp.Body.Close()
 
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return string(contents), nil
+	if resp.StatusCode == 200 {
+		err := json.Unmarshal(contents, &data)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	errg := Error{}
+
+	err = json.Unmarshal(contents, &errg)
+	if err != nil {
+		return err
+	}
+
+	return errg
 }
