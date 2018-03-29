@@ -1,9 +1,5 @@
 package bitgo
 
-import (
-	"encoding/json"
-)
-
 // Wallets holds the list of wallets
 type Wallets struct {
 	Coin    string          `json:"coin"`
@@ -12,21 +8,35 @@ type Wallets struct {
 
 // WalletDetails holds the paricular wallet details
 type WalletDetails struct {
-	ID                       string           `json:"id"`
-	Label                    string           `json:"label"`
-	Coin                     string           `json:"coin"`
-	M                        int64            `json:"m"`
-	N                        int64            `json:"n"`
-	Keys                     []string         `json:"keys"`
-	Tags                     []string         `json:"tags"`
-	Users                    []UserDetails    `json:"users"`
-	TransactionNotifications bool             `json:"disableTransactionNotifications"`
-	Deleted                  bool             `json:"deleted"`
-	ApprovalsRequired        int64            `json:"approvalsRequired"`
-	Balance                  string           `json:"balanceString"`
-	ConfirmedBalance         string           `json:"confirmedBalanceString"`
-	SpendableBalance         string           `json:"spendableBalanceString"`
-	CoinSpecific             *json.RawMessage `json:"coinSpecific"`
+	ID                       string        `json:"id"`
+	WalletID                 string        `json:"wallet"`
+	Address                  string        `json:"address"`
+	Label                    string        `json:"label"`
+	Coin                     string        `json:"coin"`
+	M                        int64         `json:"m"`
+	N                        int64         `json:"n"`
+	Keys                     []string      `json:"keys"`
+	Tags                     []string      `json:"tags"`
+	Users                    []UserDetails `json:"users"`
+	TransactionNotifications bool          `json:"disableTransactionNotifications"`
+	Deleted                  bool          `json:"deleted"`
+	ApprovalsRequired        int64         `json:"approvalsRequired"`
+	Balance                  string        `json:"balanceString"`
+	ConfirmedBalance         string        `json:"confirmedBalanceString"`
+	SpendableBalance         string        `json:"spendableBalanceString"`
+	CoinSpecific             struct {
+		RedeemScript string `json:"redeemScript"`
+	} `json:"coinSpecific"`
+}
+
+// WalletAddress -
+type WalletAddress struct {
+	Limit               int64           `json:"limit"`
+	Coin                string          `json:"coin"`
+	Count               int64           `json:"count"`
+	PendingAddressCount int64           `json:"pendingAddressCount"`
+	TotalAddressCount   int64           `json:"totalAddressCount"`
+	Addresses           []WalletDetails `json:"addresses"`
 }
 
 // UserDetails holds the user details
@@ -304,4 +314,15 @@ func (c *Config) GetMaximumSpendable(coin, walletID string) (*MaximumSpendable, 
 		return nil, err
 	}
 	return max, nil
+}
+
+// ListWalletAddresses -
+func (c *Config) ListWalletAddresses(coin, walletID string) (*WalletAddress, error) {
+	addresses := &WalletAddress{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/addresses"
+	err := c.SendHTTPRequest("GET", c.BaseURL, addresses)
+	if err != nil {
+		return nil, err
+	}
+	return addresses, nil
 }
