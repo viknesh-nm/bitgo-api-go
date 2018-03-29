@@ -202,6 +202,25 @@ type ShareDetails struct {
 	State       string `json:"state"`
 }
 
+// UserWebhooks -
+type UserWebhooks struct {
+	Webhooks []UWebHook `json:"webhooks"`
+}
+
+// UWebHook -
+type UWebHook struct {
+	ID                       string `json:"id"`
+	Label                    string `json:"label"`
+	Created                  string `json:"created"`
+	Coin                     string `json:"coin"`
+	Type                     string `json:"type"`
+	URL                      string `json:"url"`
+	State                    string `json:"state"`
+	NumConfirmations         int64  `json:"numConfirmations"`
+	Version                  int64  `json:"version"`
+	SuccessiveFailedAttempts int64  `json:"successiveFailedAttempts"`
+}
+
 // ListWallets -
 func (c *Config) ListWallets(coin string) (*Wallets, error) {
 	wallets := &Wallets{}
@@ -365,4 +384,15 @@ func (c *Config) GetWalletShareByID(coin, shareID string) (*ShareDetails, error)
 		return nil, err
 	}
 	return walletShare, nil
+}
+
+// ListUserWebhooks -
+func (c *Config) ListUserWebhooks(coin string) (*UserWebhooks, error) {
+	userWebhooks := &UserWebhooks{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/webhooks"
+	err := c.SendHTTPRequest("GET", c.BaseURL, userWebhooks)
+	if err != nil {
+		return nil, err
+	}
+	return userWebhooks, nil
 }
