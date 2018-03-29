@@ -63,7 +63,7 @@ type Transfer struct {
 	ID            string         `json:"id"`
 	Coin          string         `json:"coin"`
 	WalletID      string         `json:"wallet"`
-	TransferID    string         `json:"txid"`
+	TransID       string         `json:"txid"`
 	Height        int64          `json:"height"`
 	Date          string         `json:"date"`
 	Confirmations int64          `json:"confirmations"`
@@ -84,11 +84,13 @@ type Transfer struct {
 	Outputs       []TransIO      `json:"outputs"`
 }
 
+// TransHistory -
 type TransHistory struct {
 	Date   string `json:"date"`
 	Action string `json:"action"`
 }
 
+// TransEntry -
 type TransEntry struct {
 	Address     string `json:"address"`
 	Wallet      string `json:"wallet"`
@@ -98,6 +100,7 @@ type TransEntry struct {
 	Outputs     int64  `json:"outputs"`
 }
 
+// TransIO -
 type TransIO struct {
 	ID          string `json:"id"`
 	Address     string `json:"address"`
@@ -108,10 +111,12 @@ type TransIO struct {
 	Index       int64  `json:"index"`
 }
 
+// WalletTransactions -
 type WalletTransactions struct {
 	Transactions []Transaction `json:"transactions"`
 }
 
+// Transaction -
 type Transaction struct {
 	ID               string       `json:"id"`
 	NormalizedTxHash string       `json:"normalizedTxHash"`
@@ -131,6 +136,44 @@ type Transaction struct {
 	Outputs          []TransIO    `json:"outputs"`
 }
 
+// Balances -
+type Balances struct {
+	Balance                int64  `json:"balance"`
+	ConfirmedBalance       int64  `json:"confirmedBalance"`
+	SpendableBalance       int64  `json:"spendableBalance"`
+	BalanceString          string `json:"balanceString"`
+	ConfirmedBalanceString string `json:"confirmedBalanceString"`
+	SpendableBalanceString string `json:"spendableBalanceString"`
+}
+
+// WalletUnspents -
+type WalletUnspents struct {
+	Coin            string   `json:"coin"`
+	NextBatchPrevID string   `json:"nextBatchPrevId"`
+	Unspents        []string `json:"unspents"`
+}
+
+// Unspent -
+type Unspent struct {
+	ID           string `json:"id"`
+	Address      string `json:"address"`
+	Value        int64  `json:"value"`
+	BlockHeight  int64  `json:"blockHeight"`
+	Date         string `json:"date"`
+	Wallet       string `json:"wallet"`
+	FromWallet   string `json:"fromWallet"`
+	Chain        int64  `json:"chain"`
+	Index        int64  `json:"index"`
+	RedeemScript string `json:"redeemScript"`
+	IsSegwit     bool   `json:"isSegwit"`
+}
+
+// MaximumSpendable -
+type MaximumSpendable struct {
+	MaxSpendable string `json:"maximumSpendable"`
+	Coin         string `json:"coin"`
+}
+
 // ListWallets -
 func (c *Config) ListWallets(coin string) (*Wallets, error) {
 	wallets := &Wallets{}
@@ -142,8 +185,8 @@ func (c *Config) ListWallets(coin string) (*Wallets, error) {
 	return wallets, nil
 }
 
-// GetSingleWallet -
-func (c *Config) GetSingleWallet(coin string, walletID string) (*WalletDetails, error) {
+// GetWalletByID -
+func (c *Config) GetWalletByID(coin, walletID string) (*WalletDetails, error) {
 	wallet := &WalletDetails{}
 	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID
 	err := c.SendHTTPRequest("GET", c.BaseURL, wallet)
@@ -153,8 +196,19 @@ func (c *Config) GetSingleWallet(coin string, walletID string) (*WalletDetails, 
 	return wallet, nil
 }
 
+// GetWalletByAddress -
+func (c *Config) GetWalletByAddress(coin, walletAddress string) (*WalletDetails, error) {
+	wallet := &WalletDetails{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/address/" + walletAddress
+	err := c.SendHTTPRequest("GET", c.BaseURL, wallet)
+	if err != nil {
+		return nil, err
+	}
+	return wallet, nil
+}
+
 // WalletWebhooks -
-func (c *Config) WalletWebhooks(coin string, walletID string) (*WebHookWallets, error) {
+func (c *Config) WalletWebhooks(coin, walletID string) (*WebHookWallets, error) {
 	webHookWallets := &WebHookWallets{}
 	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/webhooks"
 	err := c.SendHTTPRequest("GET", c.BaseURL, webHookWallets)
@@ -165,7 +219,7 @@ func (c *Config) WalletWebhooks(coin string, walletID string) (*WebHookWallets, 
 }
 
 // ListWalletTransfer -
-func (c *Config) ListWalletTransfer(coin string, walletID string) (*WalletTransfer, error) {
+func (c *Config) ListWalletTransfer(coin, walletID string) (*WalletTransfer, error) {
 	walletTransfer := &WalletTransfer{}
 	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/transfer"
 	err := c.SendHTTPRequest("GET", c.BaseURL, walletTransfer)
@@ -175,8 +229,41 @@ func (c *Config) ListWalletTransfer(coin string, walletID string) (*WalletTransf
 	return walletTransfer, nil
 }
 
+// ListWalletUnspents -
+func (c *Config) ListWalletUnspents(coin, walletID string) (*WalletUnspents, error) {
+	walletUnspents := &WalletUnspents{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/unspents"
+	err := c.SendHTTPRequest("GET", c.BaseURL, walletUnspents)
+	if err != nil {
+		return nil, err
+	}
+	return walletUnspents, nil
+}
+
+// GetWalletTransferByID -
+func (c *Config) GetWalletTransferByID(coin, walletID, transferID string) (*Transfer, error) {
+	walletTransfer := &Transfer{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/transfer/" + transferID
+	err := c.SendHTTPRequest("GET", c.BaseURL, walletTransfer)
+	if err != nil {
+		return nil, err
+	}
+	return walletTransfer, nil
+}
+
+// GetWalletTransferBySequenceID -
+func (c *Config) GetWalletTransferBySequenceID(coin, walletID, sequenceID string) (*Transfer, error) {
+	walletTransfer := &Transfer{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/transfer/sequenceId/" + sequenceID
+	err := c.SendHTTPRequest("GET", c.BaseURL, walletTransfer)
+	if err != nil {
+		return nil, err
+	}
+	return walletTransfer, nil
+}
+
 // ListWalletTransactions -
-func (c *Config) ListWalletTransactions(coin string, walletID string) (*WalletTransactions, error) {
+func (c *Config) ListWalletTransactions(coin, walletID string) (*WalletTransactions, error) {
 	walletTransactions := &WalletTransactions{}
 	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/tx"
 	err := c.SendHTTPRequest("GET", c.BaseURL, walletTransactions)
@@ -184,4 +271,37 @@ func (c *Config) ListWalletTransactions(coin string, walletID string) (*WalletTr
 		return nil, err
 	}
 	return walletTransactions, nil
+}
+
+// GetWalletTransactionByID -
+func (c *Config) GetWalletTransactionByID(coin, walletID, transID string) (*Transaction, error) {
+	walletTransactions := &Transaction{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/tx/" + transID
+	err := c.SendHTTPRequest("GET", c.BaseURL, walletTransactions)
+	if err != nil {
+		return nil, err
+	}
+	return walletTransactions, nil
+}
+
+// GetTotalBalances -
+func (c *Config) GetTotalBalances(coin string) (*Balances, error) {
+	balances := &Balances{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/balances"
+	err := c.SendHTTPRequest("GET", c.BaseURL, balances)
+	if err != nil {
+		return nil, err
+	}
+	return balances, nil
+}
+
+// GetMaximumSpendable -
+func (c *Config) GetMaximumSpendable(coin, walletID string) (*MaximumSpendable, error) {
+	max := &MaximumSpendable{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/maximumSpendable"
+	err := c.SendHTTPRequest("GET", c.BaseURL, max)
+	if err != nil {
+		return nil, err
+	}
+	return max, nil
 }

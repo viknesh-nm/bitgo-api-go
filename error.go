@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+// Error holds the error field listed from the server
 type Error struct {
 	ErrMessage string `json:"error"`
 	RequestID  string `json:"requestId"`

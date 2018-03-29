@@ -13,6 +13,7 @@ const (
 	v2         = "v2/"
 )
 
+// Config -
 type Config struct {
 	AccessToken string
 	BaseURL     string
