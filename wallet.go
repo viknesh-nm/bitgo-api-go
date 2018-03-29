@@ -184,6 +184,24 @@ type MaximumSpendable struct {
 	Coin         string `json:"coin"`
 }
 
+// WalletShare -
+type WalletShare struct {
+	Incoming []ShareDetails `json:"incoming"`
+	Outgoing []ShareDetails `json:"outgoing"`
+}
+
+// ShareDetails -
+type ShareDetails struct {
+	ID          string `json:"id"`
+	Coin        string `json:"coin"`
+	Wallet      string `json:"wallet"`
+	WalletLabel string `json:"walletLabel"`
+	FromUser    string `json:"fromUser"`
+	ToUser      string `json:"toUser"`
+	Permissions string `json:"permissions"`
+	State       string `json:"state"`
+}
+
 // ListWallets -
 func (c *Config) ListWallets(coin string) (*Wallets, error) {
 	wallets := &Wallets{}
@@ -325,4 +343,26 @@ func (c *Config) ListWalletAddresses(coin, walletID string) (*WalletAddress, err
 		return nil, err
 	}
 	return addresses, nil
+}
+
+// ListWalletShares -
+func (c *Config) ListWalletShares(coin string) (*WalletShare, error) {
+	walletShare := &WalletShare{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/walletshare"
+	err := c.SendHTTPRequest("GET", c.BaseURL, walletShare)
+	if err != nil {
+		return nil, err
+	}
+	return walletShare, nil
+}
+
+// GetWalletShareByID -
+func (c *Config) GetWalletShareByID(coin, shareID string) (*ShareDetails, error) {
+	walletShare := &ShareDetails{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/walletshare/" + shareID
+	err := c.SendHTTPRequest("GET", c.BaseURL, walletShare)
+	if err != nil {
+		return nil, err
+	}
+	return walletShare, nil
 }
