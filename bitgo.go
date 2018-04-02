@@ -13,9 +13,24 @@ const (
 	v2         = "v2/"
 )
 
+// Config -
 type Config struct {
 	AccessToken string
 	BaseURL     string
+}
+
+type QParams struct {
+	AllTokens          bool
+	EnforceMinConfirms bool
+	Limit              int
+	SortOrder          int
+	MinValue           int
+	MaxValue           int
+	MinHeight          int
+	MinConfirms        int
+	FeeRate            int
+	EnterpriseID       string
+	PrevID             string
 }
 
 // New -
