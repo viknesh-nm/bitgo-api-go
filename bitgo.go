@@ -19,6 +19,20 @@ type Config struct {
 	BaseURL     string
 }
 
+type QParams struct {
+	AllTokens          bool
+	EnforceMinConfirms bool
+	Limit              int
+	SortOrder          int
+	MinValue           int
+	MaxValue           int
+	MinHeight          int
+	MinConfirms        int
+	FeeRate            int
+	EnterpriseID       string
+	PrevID             string
+}
+
 // New -
 func New(token string) *Config {
 	return &Config{

@@ -1,5 +1,10 @@
 package bitgo
 
+import (
+	"net/url"
+	"strconv"
+)
+
 // Wallets holds the list of wallets
 type Wallets struct {
 	Coin    string          `json:"coin"`
@@ -222,9 +227,17 @@ type UWebHook struct {
 }
 
 // ListWallets -
-func (c *Config) ListWallets(coin string) (*Wallets, error) {
+func (c *Config) ListWallets(coin string, params ...QParams) (*Wallets, error) {
 	wallets := &Wallets{}
-	c.BaseURL = c.BaseURL + v2 + coin + "/wallet"
+	p := url.Values{}
+	if params != nil {
+		p.Set("allTokens", strconv.FormatBool(params[0].AllTokens))
+		p.Set("limit", strconv.Itoa(params[0].Limit))
+		p.Set("prevId", params[0].PrevID)
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet?" + p.Encode()
+	} else {
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet"
+	}
 	err := c.SendHTTPRequest("GET", c.BaseURL, wallets)
 	if err != nil {
 		return nil, err
@@ -233,9 +246,15 @@ func (c *Config) ListWallets(coin string) (*Wallets, error) {
 }
 
 // GetWalletByID -
-func (c *Config) GetWalletByID(coin, walletID string) (*WalletDetails, error) {
+func (c *Config) GetWalletByID(coin, walletID string, params ...QParams) (*WalletDetails, error) {
 	wallet := &WalletDetails{}
-	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID
+	p := url.Values{}
+	if params != nil {
+		p.Set("allTokens", strconv.FormatBool(params[0].AllTokens))
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "?" + p.Encode()
+	} else {
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID
+	}
 	err := c.SendHTTPRequest("GET", c.BaseURL, wallet)
 	if err != nil {
 		return nil, err
@@ -255,9 +274,15 @@ func (c *Config) GetWalletByAddress(coin, walletAddress string) (*WalletDetails,
 }
 
 // WalletWebhooks -
-func (c *Config) WalletWebhooks(coin, walletID string) (*WebHookWallets, error) {
+func (c *Config) WalletWebhooks(coin, walletID string, params ...QParams) (*WebHookWallets, error) {
 	webHookWallets := &WebHookWallets{}
-	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/webhooks"
+	p := url.Values{}
+	if params != nil {
+		p.Set("allTokens", strconv.FormatBool(params[0].AllTokens))
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/webhooks?" + p.Encode()
+	} else {
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/webhooks"
+	}
 	err := c.SendHTTPRequest("GET", c.BaseURL, webHookWallets)
 	if err != nil {
 		return nil, err
@@ -266,9 +291,16 @@ func (c *Config) WalletWebhooks(coin, walletID string) (*WebHookWallets, error) 
 }
 
 // ListWalletTransfer -
-func (c *Config) ListWalletTransfer(coin, walletID string) (*WalletTransfer, error) {
+func (c *Config) ListWalletTransfer(coin, walletID string, params ...QParams) (*WalletTransfer, error) {
 	walletTransfer := &WalletTransfer{}
-	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/transfer"
+	p := url.Values{}
+	if params != nil {
+		p.Set("prevId", params[0].PrevID)
+		p.Set("allTokens", strconv.FormatBool(params[0].AllTokens))
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/transfer?" + p.Encode()
+	} else {
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/transfer"
+	}
 	err := c.SendHTTPRequest("GET", c.BaseURL, walletTransfer)
 	if err != nil {
 		return nil, err
@@ -277,9 +309,19 @@ func (c *Config) ListWalletTransfer(coin, walletID string) (*WalletTransfer, err
 }
 
 // ListWalletUnspents -
-func (c *Config) ListWalletUnspents(coin, walletID string) (*WalletUnspents, error) {
+func (c *Config) ListWalletUnspents(coin, walletID string, params ...QParams) (*WalletUnspents, error) {
 	walletUnspents := &WalletUnspents{}
-	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/unspents"
+	p := url.Values{}
+	if params != nil {
+		p.Set("prevId", params[0].PrevID)
+		p.Set("minValue", strconv.Itoa(params[0].MinValue))
+		p.Set("maxValue", strconv.Itoa(params[0].MaxValue))
+		p.Set("minHeight", strconv.Itoa(params[0].MinHeight))
+		p.Set("minConfirms", strconv.Itoa(params[0].MinConfirms))
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/unspents?" + p.Encode()
+	} else {
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/unspents"
+	}
 	err := c.SendHTTPRequest("GET", c.BaseURL, walletUnspents)
 	if err != nil {
 		return nil, err
@@ -310,9 +352,16 @@ func (c *Config) GetWalletTransferBySequenceID(coin, walletID, sequenceID string
 }
 
 // ListWalletTransactions -
-func (c *Config) ListWalletTransactions(coin, walletID string) (*WalletTransactions, error) {
+func (c *Config) ListWalletTransactions(coin, walletID string, params ...QParams) (*WalletTransactions, error) {
 	walletTransactions := &WalletTransactions{}
-	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/tx"
+	p := url.Values{}
+	if params != nil {
+		p.Set("allTokens", strconv.FormatBool(params[0].AllTokens))
+		p.Set("prevId", params[0].PrevID)
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/tx?" + p.Encode()
+	} else {
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/tx"
+	}
 	err := c.SendHTTPRequest("GET", c.BaseURL, walletTransactions)
 	if err != nil {
 		return nil, err
@@ -343,9 +392,22 @@ func (c *Config) GetTotalBalances(coin string) (*Balances, error) {
 }
 
 // GetMaximumSpendable -
-func (c *Config) GetMaximumSpendable(coin, walletID string) (*MaximumSpendable, error) {
+func (c *Config) GetMaximumSpendable(coin, walletID string, params ...QParams) (*MaximumSpendable, error) {
 	max := &MaximumSpendable{}
-	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/maximumSpendable"
+	p := url.Values{}
+	if params != nil {
+		p.Set("prevId", params[0].PrevID)
+		p.Set("limit", strconv.Itoa(params[0].Limit))
+		p.Set("minValue", strconv.Itoa(params[0].MinValue))
+		p.Set("maxValue", strconv.Itoa(params[0].MaxValue))
+		p.Set("minHeight", strconv.Itoa(params[0].MinHeight))
+		p.Set("minConfirms", strconv.Itoa(params[0].MinConfirms))
+		p.Set("feeRate", strconv.Itoa(params[0].FeeRate))
+		p.Set("enforceMinConfirmsForChange", strconv.FormatBool(params[0].EnforceMinConfirms))
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/maximumSpendable?" + p.Encode()
+	} else {
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/maximumSpendable"
+	}
 	err := c.SendHTTPRequest("GET", c.BaseURL, max)
 	if err != nil {
 		return nil, err
@@ -354,9 +416,17 @@ func (c *Config) GetMaximumSpendable(coin, walletID string) (*MaximumSpendable, 
 }
 
 // ListWalletAddresses -
-func (c *Config) ListWalletAddresses(coin, walletID string) (*WalletAddress, error) {
+func (c *Config) ListWalletAddresses(coin, walletID string, params ...QParams) (*WalletAddress, error) {
 	addresses := &WalletAddress{}
-	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/addresses"
+	p := url.Values{}
+	if params != nil {
+		p.Set("prevId", params[0].PrevID)
+		p.Set("limit", strconv.Itoa(params[0].Limit))
+		p.Set("sortOrder", strconv.Itoa(params[0].SortOrder)) // sort order should be either -1 or 1
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/addresses?" + p.Encode()
+	} else {
+		c.BaseURL = c.BaseURL + v2 + coin + "/wallet/" + walletID + "/addresses"
+	}
 	err := c.SendHTTPRequest("GET", c.BaseURL, addresses)
 	if err != nil {
 		return nil, err

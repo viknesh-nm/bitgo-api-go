@@ -1,8 +1,6 @@
 package bitgo
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 // Error holds the error field listed from the server
 type Error struct {
