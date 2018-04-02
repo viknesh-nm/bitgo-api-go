@@ -5,20 +5,25 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const (
 	baseAPIURL = "https://www.bitgo.com/api/"
 	v1         = "v1/"
 	v2         = "v2/"
+	// defaultTimeout is the default timeout duration used on HTTP requests.
+	defaultTimeout = 10 * time.Second
 )
 
 // Config -
 type Config struct {
 	AccessToken string
 	BaseURL     string
+	Timeout     time.Duration
 }
 
+// QParams -
 type QParams struct {
 	AllTokens          bool
 	EnforceMinConfirms bool
@@ -38,6 +43,7 @@ func New(token string) *Config {
 	return &Config{
 		AccessToken: token,
 		BaseURL:     baseAPIURL,
+		Timeout:     defaultTimeout,
 	}
 }
 
@@ -54,7 +60,7 @@ func (c *Config) SendHTTPRequest(method, path string, data interface{}) error {
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Authorization", "Bearer "+c.AccessToken)
 
-	httpClient := &http.Client{}
+	httpClient := &http.Client{Timeout: c.Timeout}
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
