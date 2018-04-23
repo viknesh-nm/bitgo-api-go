@@ -1,6 +1,7 @@
 package bitgo
 
 import (
+	"encoding/json"
 	"net/url"
 	"strconv"
 )
@@ -224,6 +225,96 @@ type UWebHook struct {
 	NumConfirmations         int64  `json:"numConfirmations"`
 	Version                  int64  `json:"version"`
 	SuccessiveFailedAttempts int64  `json:"successiveFailedAttempts"`
+}
+
+// GenerateWalletRequest -
+type GenerateWalletRequest struct {
+	Label                           string `json:"label,mandatory"`
+	Passphrase                      string `json:"passphrase,mandatory"`
+	UserKey                         string `json:"userKey"`
+	BackupXpub                      string `json:"backupXpub"`
+	BackupXpubProvider              string `json:"backupXpubProvider"`
+	Enterprise                      string `json:"enterprise"`
+	DisableTransactionNotifications bool   `json:"disableTransactionNotifications"`
+	GasPrice                        int64  `json:"gasPrice"`
+	PasscodeEncryptionCod           string `json:"passcodeEncryptionCod"`
+}
+
+// GResponse -
+type GResponse struct {
+	Wallet struct {
+		WalletList GWalletResponse `json:"_wallet"`
+	} `json:"wallet"`
+}
+
+// GWalletResponse -
+type GWalletResponse struct {
+	ID    string              `json:"id"`
+	Label string              `json:"label"`
+	Coin  string              `json:"coin"`
+	Users []WalletUserDetails `json:"users"`
+	Keys  []string            `json:"keys"`
+	Balances
+}
+
+// WalletUserDetails -
+type WalletUserDetails struct {
+	User        string   `json:"user"`
+	Permissions []string `json:"permissions"`
+}
+
+// AddWalletRequest -
+type AddWalletRequest struct {
+	Label                          string   `json:"label,mandatory"`
+	M                              int64    `json:"m,mandatory"`
+	N                              int64    `json:"n,mandatory"`
+	Keys                           []string `json:"keys,mandatory"`
+	Enterprise                     string   `json:"enterprise"`
+	IsCold                         bool     `json:"isCold"`
+	DisableTransactionNotification bool     `json:"disableTransactionNotification"`
+}
+
+// GenerateWallet -
+func (c *Config) GenerateWallet(coin string, bRequest GenerateWalletRequest) (*GWalletResponse, error) {
+
+	gWallets := GWalletResponse{}
+	walletDetails := &GResponse{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/generate"
+
+	bodyRequest, err := json.Marshal(bRequest)
+	if err != nil {
+		return nil, err
+	}
+	c.body = bodyRequest
+
+	err = c.SendHTTPRequest("POST", c.BaseURL, walletDetails)
+	if err != nil {
+		return nil, err
+	}
+	gWallets = walletDetails.Wallet.WalletList
+	return &gWallets, nil
+}
+
+// AddWallet -
+func (c *Config) AddWallet(coin string, bRequest AddWalletRequest) (*GWalletResponse, error) {
+
+	gWallets := GWalletResponse{}
+	walletDetails := &GResponse{}
+	c.BaseURL = c.BaseURL + v2 + coin + "/wallet"
+
+	bodyRequest, err := json.Marshal(bRequest)
+	if err != nil {
+		return nil, err
+	}
+	c.body = bodyRequest
+
+	err = c.SendHTTPRequest("POST", c.BaseURL, walletDetails)
+	if err != nil {
+		return nil, err
+	}
+	gWallets = walletDetails.Wallet.WalletList
+
+	return &gWallets, nil
 }
 
 // ListWallets -

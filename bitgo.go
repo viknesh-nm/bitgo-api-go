@@ -1,6 +1,7 @@
 package bitgo
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -21,6 +22,7 @@ type Config struct {
 	AccessToken string
 	BaseURL     string
 	Timeout     time.Duration
+	body        []byte
 }
 
 // QParams -
@@ -51,7 +53,7 @@ func New(token string) *Config {
 func (c *Config) SendHTTPRequest(method, path string, data interface{}) error {
 	method = strings.ToUpper(method)
 
-	req, err := http.NewRequest(method, path, strings.NewReader(""))
+	req, err := http.NewRequest(method, path, bytes.NewReader(c.body))
 	if err != nil {
 		return err
 	}
