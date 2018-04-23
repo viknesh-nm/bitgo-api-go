@@ -276,8 +276,6 @@ type AddWalletRequest struct {
 
 // GenerateWallet -
 func (c *Config) GenerateWallet(coin string, bRequest GenerateWalletRequest) (*GWalletResponse, error) {
-
-	gWallets := GWalletResponse{}
 	walletDetails := &GResponse{}
 	c.BaseURL = c.BaseURL + v2 + coin + "/wallet/generate"
 
@@ -291,14 +289,11 @@ func (c *Config) GenerateWallet(coin string, bRequest GenerateWalletRequest) (*G
 	if err != nil {
 		return nil, err
 	}
-	gWallets = walletDetails.Wallet.WalletList
-	return &gWallets, nil
+	return &walletDetails.Wallet.WalletList, nil
 }
 
 // AddWallet -
 func (c *Config) AddWallet(coin string, bRequest AddWalletRequest) (*GWalletResponse, error) {
-
-	gWallets := GWalletResponse{}
 	walletDetails := &GResponse{}
 	c.BaseURL = c.BaseURL + v2 + coin + "/wallet"
 
@@ -312,9 +307,7 @@ func (c *Config) AddWallet(coin string, bRequest AddWalletRequest) (*GWalletResp
 	if err != nil {
 		return nil, err
 	}
-	gWallets = walletDetails.Wallet.WalletList
-
-	return &gWallets, nil
+	return &walletDetails.Wallet.WalletList, nil
 }
 
 // ListWallets -
